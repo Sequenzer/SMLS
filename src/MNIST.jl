@@ -1,5 +1,5 @@
 using MLDatasets: MNIST, convert2image
-##using Images
+using Images
 
 dataset = MNIST(:train)
 testset = MNIST(:test)
@@ -104,6 +104,15 @@ for epoch in 1:10
 end
 
 
-model(x1)
-y1
+loss
 
+xt,yt = first(test)
+xt
+yt
+
+convert2image(testset, 1)
+
+
+using Flux
+
+Flux.s
