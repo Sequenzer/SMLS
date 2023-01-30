@@ -11,8 +11,8 @@ using Statistics
 using Flux
 
 ##Gradients
-
-
+?Flux.onehotbatch()
+?Flux.onehot()
 f(x)=x^2
 
 df(x)=gradient(f,x)[1]
@@ -54,7 +54,7 @@ x1, y1 = first(data2)
 size(x1)
 
 ##Back to MNIST
-
+Flux.onehotbatch(dataset.targets,0:9)
 datazip= zip(eachslice(dataset.features,dims=3),eachcol(dataset.targets))
 
 function toCategory(x)
@@ -63,6 +63,9 @@ function toCategory(x)
     return sol
 end
 
+
+
+Flux.DataLoader((Flux.flatten(dataset.features),Flux.onehotbatch(dataset.targets,0:9)),:
 data = Flux.DataLoader((Flux.flatten(dataset.features),Flux.stack(toCategory.(dataset.targets))),batchsize=32,shuffle = true)
 x1, y1 = first(data)
 test = Flux.DataLoader((Flux.flatten(testset.features),Flux.stack(toCategory.(testset.targets))),shuffle = true)
