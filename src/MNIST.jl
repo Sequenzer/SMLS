@@ -10,49 +10,6 @@ using Plots
 using Statistics
 using Flux
 
-##Gradients
-
-
-f(x)=x^2
-
-df(x)=gradient(f,x)[1]
-
-nt = (a=[2,1],b=[2,0],c=tanh)
-
-
-##Calculate 
-g(x::NamedTuple) = sum(abs2,x.a .- x.b)
-
-g(nt)
-
-dg_nt = gradient(g,nt)[1]
-
-## Build model
-
-layers= [Dense(10=>5, σ),Dense(5=>2),softmax]
-
-#How its stacked under the hood
-models(x)= foldl((x,m)->m(x),layers,init=x)
-
-
-model2 = Chain(
-    Dense(10=>5, σ),
-    Dense(5=>2),
-    softmax)
-
-model2(rand(10))
-
-opt_state= Flux.setup(Adam(),model2)
-
-X = rand(28, 28, 60_000);  # many images, each 28 × 28
-Y = rand(10, 60_000)
-data2 = zip(eachslice(X; dims=3), eachcol(Y))
-
-data2 = Flux.DataLoader((X, Y), batchsize=32)
-
-x1, y1 = first(data2)
-size(x1)
-
 ##Back to MNIST
 
 datazip= zip(eachslice(dataset.features,dims=3),eachcol(dataset.targets))
@@ -63,8 +20,13 @@ function toCategory(x)
     return sol
 end
 
-data = Flux.DataLoader((Flux.flatten(dataset.features),Flux.stack(toCategory.(dataset.targets))),batchsize=32,shuffle = true)
+targets = Flux.onehotbatch(dataset.targets, 0:9)
+data = Flux.DataLoader((dataset.features, targets), batchsize=32,shuffle = true)
+
+
 x1, y1 = first(data)
+
+
 test = Flux.DataLoader((Flux.flatten(testset.features),Flux.stack(toCategory.(testset.targets))),shuffle = true)
 
 
@@ -73,16 +35,18 @@ size(y1)
 y1
 
 
-
-
 toCategory(4)
     
 reshape(x1,(28*28,32))
 
 model = Chain(
-    Dense(784=>20,σ),
-    Dense(20,10),
-    softmax)
+    Conv((3, 3), 1 => 10, pad=(1, 1), relu))
+
+    #x -> maxpool(x, (2, 2)),
+
+    #x -> reshape(x, :, size(x, 3)), 
+    #Dense(14 * 14 => 10),
+    #softmax)
 
 model(x1)
 
