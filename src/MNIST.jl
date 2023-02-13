@@ -10,8 +10,9 @@ using Plots
 using Statistics
 using Flux
 
-##Back to MNIST
 
+##Back to MNIST
+Flux.onehotbatch(dataset.targets,0:9)
 datazip= zip(eachslice(dataset.features,dims=3),eachcol(dataset.targets))
 
 function toCategory(x)
@@ -20,9 +21,10 @@ function toCategory(x)
     return sol
 end
 
-targets = Flux.onehotbatch(dataset.targets, 0:9)
-data = Flux.DataLoader((dataset.features, targets), batchsize=32,shuffle = true)
 
+
+Flux.DataLoader((Flux.flatten(dataset.features),Flux.onehotbatch(dataset.targets,0:9)),:
+data = Flux.DataLoader((Flux.flatten(dataset.features),Flux.stack(toCategory.(dataset.targets))),batchsize=32,shuffle = true)
 
 x1, y1 = first(data)
 
