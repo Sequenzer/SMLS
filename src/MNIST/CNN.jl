@@ -1,6 +1,8 @@
 using MLDatasets: MNIST
 
 using Flux
+using Logging
+using TensorBoardLogger
 using ProgressMeter
 using MLJ
 
@@ -36,27 +38,61 @@ model = Chain(
 
 model(x1)
 
+#Initialize TensorBoardLogger
+
+lg = TBLogger("src/MNIST/tensorboard_logs/run",min_level=Logging.Info)
+
+using Random
+
+struct sample_struct first_field; other_field; end
+
+with_logger(lg) do
+    for i=1:100
+        x0          = 0.5+i/30; s0 = 0.5/(i/20);
+        edges       = collect(-5:0.1:5)
+        centers     = collect(edges[1:end-1] .+0.05)
+        histvals    = [exp(-((c-x0)/s0)^2) for c=centers]
+        data_tuple  = (edges, histvals)
+        data_struct = sample_struct(i^2, i^1.5-0.3*i)
+
+
+        @info "test" i=i j=i^2 dd=rand(10).+0.1*i hh=data_tuple
+        @info "test_2" i=i j=2^i hh=data_tuple log_step_increment=0
+        @info "" my_weird_struct=data_struct   log_step_increment=0
+        @debug "debug_msg" this_wont_show_up=i
+    end
+end
+
+
+
+
+
+
+
+
+
+
 
 #Training Section uncomment for futur
-#optimiser = Flux.setup(Flux.Adam(0.01),model)
-#
-#loss(y_hat,y) = Flux.Losses.crossentropy(y_hat,y) 
-#
-#losses=[]
-#@showprogress for epoch in 1:100
-#    for (x,y) in train
-#        currloss,grads = Flux.withgradient(model) do m
-#            y_hat = m(x)
-#            loss(y_hat,y)
-#        end
-#        Flux.update!(optimiser,model,grads[1])
-#        push!(losses,currloss)
-#    end
-#end
+optimiser = Flux.setup(Flux.Adam(0.01),model)
+
+loss(y_hat,y) = Flux.Losses.crossentropy(y_hat,y) 
+
+losses=[]
+@showprogress for epoch in 1:100
+    for (x,y) in train
+        currloss,grads = Flux.withgradient(model) do m
+            y_hat = m(x)
+            loss(y_hat,y)
+        end
+        Flux.update!(optimiser,model,grads[1])
+        push!(losses,currloss)
+    end
+end
 
 #@save "MNIST_CNN_100ep.bson" model
 
-@load "MNIST_CNN_100ep.bson" model
+#@load "MNIST_CNN_100ep.bson" model
 
 
-accuracy(Flux.onecold(model(testX)),Flux.onecold(testY))
+#accuracy(Flux.onecold(model(testX)),Flux.onecold(testY))
